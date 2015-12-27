@@ -13,6 +13,11 @@ class ConfigRead(object):
         self.server_port = self.config.get('server','server_port')
         self.MyFTP_address = (self.server_address,int(self.server_port))
         return self.MyFTP_address
+    def user_dir(self,user_name):
+        self.user_name = user_name
+        self.config.read(self.config_file)
+        self.user_path=self.config.get('user',self.user_name)
+        return self.user_path.strip("\'")
 if __name__ == '__main__':
     test = ConfigRead()
-    print test.server_info()
+    print test.user_dir('Alan')
