@@ -63,8 +63,9 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
             self.conn.recv(100)
             file_data = 0
             with open(file_name,'rb') as file_read:
-                while file_data < int(file_size):
+                while file_data != int(file_size):
                     data = file_read.read(2048)
+                    file_data += len(data)
                     self.conn.sendall(data)
             self.conn.recv(1024)
     def data_upload(self):

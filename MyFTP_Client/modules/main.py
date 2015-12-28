@@ -86,18 +86,19 @@ class ClientArgv(object):
         self.client_socket.send(self.command)
         status_coding = self.client_socket.recv(1024)
         if status_coding == '203':
-            sys.exit('file is not found')
-        self.client_socket.send('start')
-        file_size = int(self.client_socket.recv(1024))
-        self.client_socket.send('ok')
-        file_data = 0
-        with open(comm_list[1],'wb') as file_write:
-            while file_data < file_size:
-                data = self.client_socket.recv(2048)
-                file_write.write(data)
-                file_data += len(data)
-        print '%s Transfer ok'%comm_list[1]
-        self.client_socket.send('ok')
+            print 'file is not found'
+        else:
+            self.client_socket.send('start')
+            file_size = int(self.client_socket.recv(1024))
+            self.client_socket.send('ok')
+            file_data = 0
+            with open(comm_list[1],'wb') as file_write:
+                while file_data != file_size:
+                    data = self.client_socket.recv(2048)
+                    file_write.write(data)
+                    file_data += len(data)
+            print '%s Transfer ok'%comm_list[1]
+            self.client_socket.send('ok')
     def put(self):
         comm_list = self.command.split()
         if len(comm_list) < 2:
