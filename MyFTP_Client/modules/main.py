@@ -104,6 +104,7 @@ class ClientArgv(object):
     #上传文件
     def put(self):
         comm_list = self.command.split()
+        #发送命令
         self.client_socket.send(self.command)
         #接受服务器确认收到命令的消息
         self.client_socket.recv(1024)

@@ -69,7 +69,7 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
                     self.conn.sendall(data)
             self.conn.recv(1024)
     def put(self):
-        file_name = os.path.basename(self.conn.recv(1024).split()[1])
+        file_name = os.path.basename(self.command[1])
         self.conn.send('start')
         file_size = int(self.conn.recv(1024))
         self.conn.send('ok')
