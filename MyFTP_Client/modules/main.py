@@ -71,6 +71,15 @@ class ClientArgv(object):
                 auther_count += 1
         else:
             sys.exit('User or Passwd too many mistakes')
+    def comm_argv(self):
+        while True:
+            self.command = raw_input('>>>').split()
+            if len( self.command) == 0:continue
+            if hasattr(self, self.command[0]):
+                func = getattr(self, self.command[0])
+                func()
+            else:
+                self.comm_help()
     def get(self):
         comm_list = self.command.split()
         if len(comm_list) < 2:
@@ -120,3 +129,4 @@ class ClientArgv(object):
         if self.auther():
             #接收目录长度
             self.dir_list()
+            self.comm_argv()
