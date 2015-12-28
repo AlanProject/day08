@@ -17,6 +17,7 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
         self.conn.send('Welcome to Alan FTP Server !!!')
         self.user_auth()
         self.list_dir()
+        self.comm_argv()
     #用户认证
     def user_auth(self):
         auth_count = 0
@@ -45,18 +46,22 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
             string = '%s\t%d\t%s'%(i,os.path.getsize(file),date)
             self.conn.recv(1024)
             self.conn.send(string)
-    def data_download(self):
-        command=self.conn.recv(1024)
-        if not os.path.isfile(command[1]):
+    def comm_argv(self):
+        self.command=self.conn.recv(1024)
+        if hasattr(self,self.command[0]):
+            func = getattr(self,self.command[0])
+            func()
+    def get(self):
+        if not os.path.isfile(self.command[1]):
             self.conn.send(self.staus_coding.get('file_notfound'))
         else:
             self.conn.send(self.staus_coding.get('file_found'))
             self.conn.recv(100)
-            file_size = str(os.path.getsize(command[1]))
+            file_size = str(os.path.getsize(self.command[1]))
             self.conn.send(file_size)
             self.conn.recv(100)
             file_data = 0
-            with open(command[1],'rb') as file_read:
+            with open(self.command[1],'rb') as file_read:
                 while file_data < int(file_size):
                     data = file_read.read(2048)
                     self.conn.sendall(data)
