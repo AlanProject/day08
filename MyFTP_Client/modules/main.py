@@ -69,6 +69,7 @@ class ClientArgv(object):
                 auther_count += 1
         else:
             sys.exit('User or Passwd too many mistakes')
+    #命令调度
     def comm_argv(self):
         while True:
             self.command = raw_input('>>>')
@@ -78,6 +79,7 @@ class ClientArgv(object):
                 func()
             else:
                 self.comm_help()
+    #下载文件
     def get(self):
         comm_list = self.command.split()
         if len(comm_list) < 2:
@@ -99,18 +101,26 @@ class ClientArgv(object):
                     file_data += len(data)
             print '%s Transfer ok'%comm_list[1]
             self.client_socket.send('ok')
+    #上传文件
     def put(self):
         comm_list = self.command.split()
-        if len(comm_list) < 2:
-            self.comm_help()
-            sys.exit()
-    def exit(self):
-        pass
-    def cd(self):
-        comm_list = self.command.split()
-        if len(comm_list) < 2:
-            self.comm_help()
-            sys.exit()
+        self.client_socket.send(self.command)
+        #接受服务器确认收到命令的消息
+        self.client_socket.recv(1024)
+        if not os.path.isfile(comm_list[1]):
+            print 'File is not found'
+        else:
+            file_size = str(os.path.getsize(comm_list[1]))
+            self.client_socket.send(file_size)
+            self.client_socket.recv(100)
+            file_data = 0
+            with open(comm_list[1],'rb') as file_read:
+                while file_data != int(file_size):
+                    data = file_read.read(2048)
+                    file_data += len(data)
+                    self.client_socket.sendall(data)
+            self.client_socket.recv(1024)
+    #列出文件目录
     def ls(self):
         self.client_socket.send(self.command)
         file_number = int(self.client_socket.recv(1024))
@@ -119,4 +129,13 @@ class ClientArgv(object):
             self.client_socket.send('ok')
             file_name = self.client_socket.recv(1024)
             print file_name
-    #和服务器进行认证/交互主函数
+    #切换文件目录
+    def cd(self):
+        comm_list = self.command.split()
+        if len(comm_list) < 2:
+            self.comm_help()
+            sys.exit()
+
+    #退出FTP客户端
+    def exit(self):
+        sys.exit('Exiting')

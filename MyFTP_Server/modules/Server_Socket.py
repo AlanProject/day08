@@ -68,8 +68,18 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
                     file_data += len(data)
                     self.conn.sendall(data)
             self.conn.recv(1024)
-    def data_upload(self):
-        pass
+    def put(self):
+        file_name = os.path.basename(self.conn.recv(1024).split()[1])
+        self.conn.send('start')
+        file_size = int(self.conn.recv(1024))
+        self.conn.send('ok')
+        file_data = 0
+        with open(file_name,'wb') as file_write:
+            while file_data != file_size:
+                data = self.conn.recv(2048)
+                file_write.write(data)
+                file_data += len(data)
+        self.conn.send('ok')
 if __name__ == '__main__':
     test = MyFTPSocket()
     print test.list_dir()
