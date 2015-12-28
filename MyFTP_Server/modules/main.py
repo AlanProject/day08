@@ -26,8 +26,8 @@ class ArgvHandle(object):
     def start(self):
         print 'start .....'
         #获取服务器ipaddress/port信息
-        self.host_addr = Config_Read.ConfigRead().server_info()
-        server = Server_Socket.SocketServer.ThreadingTCPServer(self.host_addr,Server_Socket.MyFTPSocket)
+        host_addr = Config_Read.ConfigRead().server_info()
+        server = Server_Socket.SocketServer.ThreadingTCPServer(host_addr,Server_Socket.MyFTPSocket)
         server.serve_forever()
 if __name__ == '__main__':
     test = ArgvHandle('test')

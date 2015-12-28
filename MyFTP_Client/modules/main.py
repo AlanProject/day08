@@ -8,6 +8,13 @@ class ClientArgv(object):
         self.argvs = argvs
         self.argvs_parser()
         self.handle()
+    def handle(self):
+        self.connect()
+        #接收打印欢迎信息
+        server_data = self.client_socket.recv(1024)
+        print server_data
+        if self.auther():
+            self.comm_argv()
     #处理参数
     def argvs_parser(self):
         argv_list = ['-s','-p']
@@ -23,17 +30,6 @@ class ClientArgv(object):
             except (ValueError,IndexError) as e:
                 self.help()
                 sys.exit()
-    '''
-    def comm_parser(self,dir_path):
-        while True:
-            self.command = raw_input(dir_path)
-            if len(self.command) == 0:continue
-            if hasattr(self,self.command.split()[0]):
-                func = getattr(self,self.command)
-                func()
-            else:
-                self.comm_help()
-    '''
     #定义help信息
     def help(self):
         print '''
@@ -77,8 +73,8 @@ class ClientArgv(object):
         while True:
             self.command = raw_input('>>>')
             if len(self.command.split()) == 0:continue
-            if hasattr(self, self.command.split()[0]):
-                func = getattr(self, self.command.split()[0])
+            if hasattr(self,self.command.split()[0]):
+                func = getattr(self,self.command.split()[0])
                 func()
             else:
                 self.comm_help()
@@ -89,7 +85,6 @@ class ClientArgv(object):
             sys.exit()
         self.client_socket.send(self.command)
         status_coding = self.client_socket.recv(1024)
-        print status_coding
         if status_coding == '203':
             sys.exit('file is not found')
         self.client_socket.send('start')
@@ -102,6 +97,7 @@ class ClientArgv(object):
                 file_write.write(data)
                 file_data += len(data)
         print '%s Transfer ok'%comm_list[1]
+        self.client_socket.send('ok')
     def put(self):
         comm_list = self.command.split()
         if len(comm_list) < 2:
@@ -114,7 +110,8 @@ class ClientArgv(object):
         if len(comm_list) < 2:
             self.comm_help()
             sys.exit()
-    def dir_list(self):
+    def ls(self):
+        self.client_socket.send(self.command)
         file_number = int(self.client_socket.recv(1024))
         self.client_socket.send('OK')
         for i in range(file_number):
@@ -122,12 +119,3 @@ class ClientArgv(object):
             file_name = self.client_socket.recv(1024)
             print file_name
     #和服务器进行认证/交互主函数
-    def handle(self):
-        self.connect()
-        #接收打印欢迎信息
-        server_data = self.client_socket.recv(1024)
-        print server_data
-        if self.auther():
-            #接收目录长度
-            self.dir_list()
-            self.comm_argv()

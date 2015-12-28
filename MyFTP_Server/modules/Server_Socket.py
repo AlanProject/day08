@@ -16,7 +16,6 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
         self.conn = self.request
         self.conn.send('Welcome to Alan FTP Server !!!')
         self.user_auth()
-        self.list_dir()
         self.comm_argv()
     #用户认证
     def user_auth(self):
@@ -33,7 +32,13 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
             else:
                 self.conn.send(self.staus_coding.get('auth_filed'))
                 auth_count += 1
-    def list_dir(self):
+    def comm_argv(self):
+        while True:
+            self.command=self.conn.recv(1024).split()
+            if hasattr(self,self.command[0]):
+                func = getattr(self,self.command[0])
+                func()
+    def ls(self):
         self.base_path = ConfigRead().user_dir(self.user_name)
         file_name = os.listdir(self.base_path)
         file_number = str(len(os.listdir(self.base_path)))
@@ -46,17 +51,8 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
             string = '%s\t%d\t%s'%(i,os.path.getsize(file),date)
             self.conn.recv(1024)
             self.conn.send(string)
-    def comm_argv(self):
-        self.command=self.conn.recv(1024).split()
-        if hasattr(self,self.command[0]):
-            print 'ok is found'
-            func = getattr(self,self.command[0])
-            func()
-        else:
-            print 'is not found'
     def get(self):
         file_name = os.path.join(self.base_path,self.command[1])
-        print file_name
         if not os.path.isfile(file_name):
             self.conn.send(self.staus_coding.get('unfile'))
         else:
@@ -70,6 +66,7 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
                 while file_data < int(file_size):
                     data = file_read.read(2048)
                     self.conn.sendall(data)
+            self.conn.recv(1024)
     def data_upload(self):
         pass
 if __name__ == '__main__':
