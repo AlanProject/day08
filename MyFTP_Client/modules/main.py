@@ -23,15 +23,17 @@ class ClientArgv(object):
             except (ValueError,IndexError) as e:
                 self.help()
                 sys.exit()
+    '''
     def comm_parser(self,dir_path):
         while True:
             self.command = raw_input(dir_path)
             if len(self.command) == 0:continue
-            if hasattr(self,self.command.split('')[0]):
+            if hasattr(self,self.command.split()[0]):
                 func = getattr(self,self.command)
                 func()
             else:
                 self.comm_help()
+    '''
     #定义help信息
     def help(self):
         print '''
@@ -73,10 +75,10 @@ class ClientArgv(object):
             sys.exit('User or Passwd too many mistakes')
     def comm_argv(self):
         while True:
-            self.command = raw_input('>>>').split()
-            if len( self.command) == 0:continue
-            if hasattr(self, self.command[0]):
-                func = getattr(self, self.command[0])
+            self.command = raw_input('>>>')
+            if len(self.command.split()) == 0:continue
+            if hasattr(self, self.command.split()[0]):
+                func = getattr(self, self.command.split()[0])
                 func()
             else:
                 self.comm_help()
@@ -86,11 +88,12 @@ class ClientArgv(object):
             self.comm_help()
             sys.exit()
         self.client_socket.send(self.command)
-        status_coding = self.recv(1024)
+        status_coding = self.client_socket.recv(1024)
+        print status_coding
         if status_coding == '203':
             sys.exit('file is not found')
         self.client_socket.send('start')
-        file_size = int(self.recv(1024))
+        file_size = int(self.client_socket.recv(1024))
         self.client_socket.send('ok')
         file_data = 0
         with open(comm_list[1],'wb') as file_write:
@@ -104,8 +107,6 @@ class ClientArgv(object):
         if len(comm_list) < 2:
             self.comm_help()
             sys.exit()
-
-
     def exit(self):
         pass
     def cd(self):
@@ -116,7 +117,7 @@ class ClientArgv(object):
     def dir_list(self):
         file_number = int(self.client_socket.recv(1024))
         self.client_socket.send('OK')
-        for i in range(file_number-1):
+        for i in range(file_number):
             self.client_socket.send('ok')
             file_name = self.client_socket.recv(1024)
             print file_name

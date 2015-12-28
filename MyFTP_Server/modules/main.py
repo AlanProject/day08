@@ -7,12 +7,15 @@ class ArgvHandle(object):
         self.argv = args
         self.MyFTP_argv()
     def MyFTP_argv(self):
-        argv_frist = self.argv[1]
-        if hasattr(self,argv_frist):
-            func = getattr(self,argv_frist)
-            func()
-        else:
-           self.MyFTP_help()
+        try:
+            argv_frist = self.argv[1]
+            if hasattr(self,argv_frist):
+                func = getattr(self,argv_frist)
+                func()
+            else:
+               self.MyFTP_help()
+        except IndexError,e:
+            self.MyFTP_help()
     def MyFTP_help(self):
         print '''
         ----------MyFTP Argv Info---------
