@@ -42,7 +42,8 @@ class ClientArgv(object):
         get [file]    :Download file
         put [file]    :Upload file
         cd [path]     :change dir path
-        exit        :exit Ftp system
+        rm [path]     :delete file
+        exit          :exit Ftp system
         '''
     #连接服务器端socket
     def connect(self):
@@ -104,6 +105,9 @@ class ClientArgv(object):
     #上传文件
     def put(self):
         comm_list = self.command.split()
+        if len(comm_list) < 2:
+            self.comm_help()
+            sys.exit()
         #发送命令
         self.client_socket.send(self.command)
         #接受服务器确认收到命令的消息
@@ -130,6 +134,10 @@ class ClientArgv(object):
             self.client_socket.send('ok')
             file_name = self.client_socket.recv(1024)
             print file_name
+    def rm(self):
+        self.client_socket.send(self.command)
+        rm_data = self.client_socket.recv(1024)
+        print rm_data
     #切换文件目录
     def cd(self):
         comm_list = self.command.split()

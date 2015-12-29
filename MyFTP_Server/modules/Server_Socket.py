@@ -69,7 +69,7 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
                     self.conn.sendall(data)
             self.conn.recv(1024)
     def put(self):
-        file_name = os.path.basename(self.command[1])
+        file_name = os.path.join(self.base_path,os.path.basename(self.command[1]))
         self.conn.send('start')
         file_size = int(self.conn.recv(1024))
         self.conn.send('ok')
@@ -80,6 +80,10 @@ class MyFTPSocket(SocketServer.BaseRequestHandler):
                 file_write.write(data)
                 file_data += len(data)
         self.conn.send('ok')
+    def rm(self):
+        file_name = os.path.join(self.base_path,os.path.basename(self.command[1]))
+        os.remove(file_name)
+        self.conn.send('remove %s ok'%os.path.basename(self.command[1]))
 if __name__ == '__main__':
     test = MyFTPSocket()
     print test.list_dir()
